@@ -6,3 +6,4 @@ cypress/videos
 .DS_Store
 cypress/e2e/e2e-pom/issue-delete-in-pom_solutions.cy.js
 cypress/e2e/issue-create_solutions.cy.js
+cypress/e2e/Notes_of_Cerebrum.md
