@@ -16,6 +16,10 @@ class IssueModal {
         this.closeDetailModalButton = '[data-testid="icon:close"]';
     }
 
+    openIssueDetailByTitle(issueTitle) {
+       return cy.contains(issueTitle).click();
+    }
+
     getIssueModal() {
         return cy.get(this.issueModal);
     }
