@@ -7,3 +7,7 @@ cypress/videos
 cypress/e2e/e2e-pom/issue-delete-in-pom_solutions.cy.js
 cypress/e2e/issue-create_solutions.cy.js
 cypress/e2e/Notes_of_Cerebrum.md
+
+cypress/e2e/Risto_hanson delete.issue.cy.js
+cypress/e2e/Shady_issue delete 2.cy.js
+cypress/e2e/Untitled-1.md

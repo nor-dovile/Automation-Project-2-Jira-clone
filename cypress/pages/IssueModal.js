@@ -14,6 +14,8 @@ class IssueModal {
         this.cancelDeletionButtonName = "Cancel";
         this.confirmationPopup = '[data-testid="modal:confirm"]';
         this.closeDetailModalButton = '[data-testid="icon:close"]';
+
+        this.originalEstimate = 'Original Estimate (hours)'
     }
 
     openIssueDetailByTitle(issueTitle) {
@@ -120,6 +122,68 @@ class IssueModal {
         cy.get(this.issueDetailModal).get(this.closeDetailModalButton).first().click();
         cy.get(this.issueDetailModal).should('not.exist');
     }
+
+    editOrAddTimeEstimation(timeEstimation) {
+        cy.contains(this.originalEstimate)
+          .next()
+          .find('input[placeholder="Number"]')
+          .clear()
+          .type(timeEstimation);
+      }
+      
+      clearTimeEstimation() {
+        cy.contains(this.originalEstimate)
+          .next()
+          .find('input[placeholder="Number"]')
+          .clear();
+      }
+
+      getTimeTrackingStateBlock() {
+        return cy.get(this.issueDetailModal)
+          .children()
+          .eq(1)
+          .children()
+          .eq(1)
+          .contains('Time Tracking')
+          .next();
+      }
+
+      ensureTimeEstimationIsVisibleOnTimeTracking(timeEstimation) {
+        this.getTimeTrackingStateBlock().within(() => {
+            cy.contains(`${timeEstimation}h estimated`).should('be.visible')
+          })
+      }
+      
+      ensureTimeEstimationIsNotExistOnTimeTracking(timeEstimation) {
+        this.getTimeTrackingStateBlock().within(() => {
+            cy.contains(`${timeEstimation}h estimated`).should('not.exist')
+          })
+      }
+
+      ensureTimeLoggedIsVisible(timeLogged) {
+        cy.contains(`${timeLogged}h logged`).should('be.visible');
+      }
+
+      ensureTimeRemainingIsVisible(timeRemaining) {
+        cy.contains(`${timeRemaining}h remaining`).should('be.visible');
+      }
+
+      ensureNoTimeIsLogged() {
+        this.getTimeTrackingStateBlock().within(() => {
+            cy.contains('No time logged').should('be.visible')
+          })
+      }
+  
+      ensureTimeRemainingOrEstimateDoesNotExist() {
+        this.getTimeTrackingStateBlock()
+          .children()
+          .eq(0)
+          .children()
+          .eq(1)
+          .children()
+          .eq(1)
+          .should('have.length', 1)
+      }
 }
 
 export default new IssueModal();
