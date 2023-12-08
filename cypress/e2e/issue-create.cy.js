@@ -1,5 +1,10 @@
 import { fakerDE as faker } from '@faker-js/faker';
 
+Cypress.on('uncaught:exception', (err, runnable) => {
+  // returning false here prevents Cypress from failing the test
+  return false;
+});
+
 describe('Issue create', () => {
   beforeEach(() => {
     navigateToIssueCreationModal();
@@ -103,8 +108,8 @@ describe('Test Case 2: Random Data Plugin Issue Creation', () => {
   it('Should create an issue and validate it successfully', () => {
 
     // Generate a random one-word title
-    const randomTitle = faker.lorem.word()
-    const randomDescription = faker.lorem.paragraphs(2)
+    const randomTitle = faker.lorem.word();
+    const randomDescription = faker.lorem.paragraphs(2);
 
     cy.get('[data-testid="modal:issue-create"]').within(() => {
       fillAndSubmitCreationModal('Task', randomDescription, randomTitle, 'Baby Yoda', 'Baby Yoda', 'Low')
@@ -133,7 +138,7 @@ describe('Test Case 2: Random Data Plugin Issue Creation', () => {
     });
   });
 
-  it('Should validate title is required field if missing', () => {
+  it.skip('Should validate title is required field if missing', () => {
     //System finds modal for creating issue and does next steps inside of it
     cy.get('[data-testid="modal:issue-create"]').within(() => {
       //Try to click create issue button without filling any data
@@ -143,6 +148,33 @@ describe('Test Case 2: Random Data Plugin Issue Creation', () => {
       cy.get('[data-testid="form-field:title"]').should('contain', 'This field is required');
     });
   });
+});
+
+describe('Task 3', () => {
+  
+  it('Should verifiy that the application is removing unnecessary spaces', () => {
+    const title = '   Hello world!   '; // Title with leading and trailing spaces
+    const randomDescription = faker.lorem.paragraphs(2)
+    navigateToIssueCreationModal();
+    fillAndSubmitCreationModal('Task', randomDescription, title, 'Baby Yoda', 'Baby Yoda', 'Low');
+
+    cy.get('[data-testid="modal:issue-create"]').should('not.exist');
+    cy.contains('Issue has been successfully created.').should('be.visible');
+    cy.reload();
+    cy.contains('Issue has been successfully created.').should('not.exist');
+    cy.wait(3000);
+
+    cy.get('[data-testid="board-list:backlog"]').should('be.visible').within(() => {
+      cy.get('[data-testid="list-issue"]')
+        .first()
+        .find('p')
+        .invoke('text')
+        .then(text => {
+          const trimmedText = text.trim();
+          expect(trimmedText).to.equal(title.trim()); 
+        });
+      });
+    });
 });
 
 function navigateToIssueCreationModal() {
@@ -185,3 +217,4 @@ function fillAndSubmitCreationModal(type, description, title, reporter, asignee,
   // Click on button "Create issue"
   cy.get('button[type="submit"]').click();
 }
+

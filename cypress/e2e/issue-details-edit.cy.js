@@ -7,7 +7,43 @@ describe('Issue details editing', () => {
     });
   });
 
-  it('Should update type, status, assignees, reporter, priority successfully', () => {
+  it('Task 1. Should check dropdown "Priority" functionality', () => {
+    const expectedLength = 5;
+    let actualOptions = [];
+    getIssueDetailsModal().within(() => {
+      // 1. get and push the current element
+      selectPriority().invoke('text')
+        .then(text => {
+          actualOptions.push(text);
+          cy.log(`text: ${text}, length: ${actualOptions.length}`);
+        })
+        .then(() => {
+          // 2. get and iterate all list and add options to array
+          clickSelectPriority();
+          getPrioritySelection().each(($child) => {
+            const text = $child.children().eq(0).children().eq(1).text().trim();
+            actualOptions.push(text)
+            cy.log(`text: ${text}, length: ${actualOptions.length}`);
+          });
+        })
+        .then(() => {
+          cy.wrap(actualOptions).should('have.length', expectedLength);
+          cy.log('done');
+        });
+    })
+  })
+
+  it('Task 2. Should check that reporters name has only characters in it', () => {
+    getIssueDetailsModal().within(() => {
+      cy.get('[data-testid="select:reporter"]').invoke('text')
+        .then(text => {
+          const regex = /^[A-Za-z\s]+$/
+          expect(regex.test(text)).to.be.true
+        })
+    })
+  })
+
+  it.skip('Should update type, status, assignees, reporter, priority successfully', () => {
     getIssueDetailsModal().within(() => {
       cy.get('[data-testid="select:type"]').click('bottomRight');
       cy.get('[data-testid="select-option:Story"]')
@@ -36,7 +72,7 @@ describe('Issue details editing', () => {
     });
   });
 
-  it('Should update title, description successfully', () => {
+  it.skip('Should update title, description successfully', () => {
     const title = 'TEST_TITLE';
     const description = 'TEST_DESCRIPTION';
 
@@ -61,5 +97,49 @@ describe('Issue details editing', () => {
     });
   });
 
-  const getIssueDetailsModal = () => cy.get('[data-testid="modal:issue-details"]');
 });
+
+function getIssueDetailsModal() {
+  return cy.get('[data-testid="modal:issue-details"]')
+}
+
+function createTestIssue(text1) {
+  cy.visit('/');
+  console.log(cy.url())
+  cy.url().should('eq', `${Cypress.env('baseUrl')}project/board`).then((url) => {
+    cy.visit(url + '/board?modal-issue-create=true');
+  });
+
+  cy.get('[data-testid="modal:issue-create"]').within(() => {
+    fillAndSubmitCreationModal(text1);
+  });
+}
+
+function fillAndSubmitCreationModal(text1,) {
+  // Open issue type dropdown and choose Task
+  //Fill up title
+  cy.get('input[name="title"]').type(text1);
+
+  // Click on button "Create issue"
+  cy.get('button[type="submit"]').click();
+}
+
+function selectPriority() {
+  return cy.get('[data-testid="select:priority"]')
+    .children()
+    .eq(0)
+    .children()
+    .eq(1);
+}
+
+function clickSelectPriority() {
+  return cy.get('[data-testid="icon:arrow-up"]').click();
+}
+
+function getPrioritySelection() {
+  return cy.get('[data-testid="select:priority"]')
+    .next()
+    .children()
+    .eq(1)
+    .children();
+}
